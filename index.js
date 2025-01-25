@@ -81,14 +81,14 @@ wss.on('connection', (ws) => {
           if (data.sessionId == sessionName) {
             ws.send(
               JSON.stringify({
-                type: 'response',
+                type: 'qr',
                 qr: qr,
               })
             );
           } else {
             ws.send(
               JSON.stringify({
-                type: 'response',
+                type: 'qr',
                 qr: qr,
               })
             );
