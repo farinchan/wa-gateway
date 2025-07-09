@@ -1,5 +1,6 @@
 const { toDataURL } = require("qrcode");
 const whatsapp = require("wa-multi-session");
+const fs = require('fs/promises');
 const ValidationError = require("../../utils/error");
 const {
   responseSuccessWithMessage,
@@ -14,6 +15,17 @@ exports.createSession = async (req, res, next) => {
     if (!sessionName) {
       throw new Error("Bad Request");
     }
+
+    const webhookData = await fs.readFile('./webhook.json', 'utf8');
+    const WebhookJson = JSON.parse(webhookData);
+    // Check if session already exists
+    const sessionExists = WebhookJson.some(item => item.session === sessionName);
+    if (!sessionExists) {
+      // Add new session to the webhook JSON
+      WebhookJson.push({ session: sessionName, webhookUrl: null });
+      await fs.writeFile('./webhook.json', JSON.stringify(WebhookJson, null, 2), 'utf8');
+    }
+    
     whatsapp.onQRUpdated(async (data) => {
       if (res && !res.headersSent) {
         const qr = await toDataURL(data.qr);
@@ -41,6 +53,16 @@ exports.deleteSession = async (req, res, next) => {
       throw new ValidationError("session Required");
     }
     whatsapp.deleteSession(sessionName);
+
+    // Remove session from webhook.json
+    const webhookData = await fs.readFile('./webhook.json', 'utf8');
+    const WebhookJson = JSON.parse(webhookData);
+    const sessionIndex = WebhookJson.findIndex(item => item.session === sessionName);
+    if (sessionIndex !== -1) {
+      WebhookJson.splice(sessionIndex, 1);
+      await fs.writeFile('./webhook.json', JSON.stringify(WebhookJson, null, 2), 'utf8');
+    }
+
     res
       .status(200)
       .json(responseSuccessWithMessage("Success Deleted " + sessionName));

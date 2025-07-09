@@ -52,6 +52,18 @@ Open On Browser & Start New Session
   http://localhost:5000/start-session?session=mysession&scan=true
 ```
 
+## Web Socket
+
+You can use the WebSocket to listen for add new session and get the QR code.
+
+```ws://localhost:5000/ws
+```
+
+| Event Name                 | Description                              |
+| :------------------------- | :--------------------------------------- | 
+| `{"session": "mysession"}` | New session created, waiting for QR code |
+
+
 ## API Reference
 
 #### Add new session

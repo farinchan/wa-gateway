@@ -14,6 +14,11 @@ exports.sendMessage = async (req, res, next) => {
 
     const receiver = to;
     if (!sessionId) throw new ValidationError("Session Not Founds");
+    // await whatsapp.sendTyping({
+    //   sessionId,
+    //   to: receiver,
+    //   duration: 1000
+    // });
     const send = await whatsapp.sendTextMessage({
       sessionId,
       to: receiver,
@@ -33,6 +38,7 @@ exports.sendMessage = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.sendImageMessage = async (req, res, next) => {
   try {
     let to = req.body.to || req.query.to;
@@ -48,7 +54,7 @@ exports.sendImageMessage = async (req, res, next) => {
     const send = await whatsapp.sendImage({
       sessionId,
       to: receiver,
-      media : urlImage,
+      media: urlImage,
       text: caption,
     });
 
@@ -64,6 +70,68 @@ exports.sendImageMessage = async (req, res, next) => {
     next(error);
   }
 }
+
+exports.sendDocumentMessage = async (req, res, next) => {
+  try {
+    let to = req.body.to || req.query.to;
+    let caption = req.body.caption || req.query.caption;
+    let urlDocument = req.body.urlDocument || req.query.urlDocument;
+    let fileName = req.body.fileName || req.query.fileName;
+    if (!fileName) fileName = "Document";
+    const sessionId = req.body.session || req.query.session || req.headers.session;
+
+    if (!to || !urlDocument) throw new ValidationError("Missing Parameters");
+    const receiver = to;
+    if (!sessionId) throw new ValidationError("Session Not Founds");
+    const send = await whatsapp.sendDocument({
+      sessionId,
+      to: receiver,
+      media: urlDocument,
+      text: caption,
+      filename: fileName,
+    });
+    res.status(200).json(
+      responseSuccessWithData({
+        id: send?.key?.id,
+        status: send?.status,
+        message: send?.message?.extendedTextMessage?.text || "Not Text",
+        remoteJid: send?.key?.remoteJid,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+exports.sendVoiceNoteMessage = async (req, res, next) => {
+  try {
+    let to = req.body.to || req.query.to;
+    let urlVoiceNote = req.body.urlVoiceNote || req.query.urlVoiceNote;
+    const sessionId =
+      req.body.session || req.query.session || req.headers.session;
+
+    if (!to || !urlVoiceNote) throw new ValidationError("Missing Parameters");
+
+    const receiver = to;
+    if (!sessionId) throw new ValidationError("Session Not Founds");
+    const send = await whatsapp.sendVoiceNote({
+      sessionId,
+      to: receiver,
+      media: urlVoiceNote,
+    });
+
+    res.status(200).json(
+      responseSuccessWithData({
+        id: send?.key?.id,
+        status: send?.status,
+        remoteJid: send?.key?.remoteJid,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 exports.sendBulkMessage = async (req, res, next) => {

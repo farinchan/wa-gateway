@@ -1,2 +1,5 @@
 node_modules/
 wa_credentials/
+.env
+.env.production
+.env.development

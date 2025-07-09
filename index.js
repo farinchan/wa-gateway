@@ -49,6 +49,8 @@ whatsapp.onConnecting((session) => {
 
 whatsapp.loadSessionsFromStorage();
 
+require("./app/listener/message_listener");
+
 
 
 const WS_PORT = process.env.WS_PORT || "5003";
