@@ -17,6 +17,7 @@ To run this project, you will need to add the following environment variables to
 // .env
 
 PORT=5001 // which port to running on your machine
+PORT_WS=5002 // which port to running websocket on your machine
 KEY=mysupersecretkey # For Securing Some Data
 ```
 
@@ -57,6 +58,7 @@ Open On Browser & Start New Session
 You can use the WebSocket to listen for add new session and get the QR code.
 
 ```ws://localhost:5000/ws
+  ws://localhost:5000/ws
 ```
 
 | Event Name                 | Description                              |
@@ -100,7 +102,32 @@ You can use the WebSocket to listen for add new session and get the QR code.
 | `session` | `string` | **Required**. Session Name You Have Created                              |
 | `to`      | `string` | **Required**. Receiver Phone Number with Country Code (e.g: 62812345678) |
 | `urlImage`| `string` | **Required**. URL Image                                                  |
-| `caption` | `string` | **Required**. Caption Massage                                                  |
+| `caption` | `string` | **Required**. Caption Massage                                            |
+
+
+#### Send Document Message
+
+```
+  POST /send-document
+```
+| Body         | Type     | Description                                                              |
+| :--------    | :------- | :----------------------------------------------------------------------- |
+| `session`    | `string` | **Required**. Session Name You Have Created                              |
+| `to`         | `string` | **Required**. Receiver Phone Number with Country (e.g: 62812345678)      |
+| `urlDocument`| `string` | **Required**. URL Document                                               |
+| `fileName`   | `string` | **Required**. File Name                                                  |
+
+#### Send Voice Note Message
+
+```
+  POST /send-voice-note
+```
+| Body             | Type     | Description                                                              |
+| :--------        | :------- | :----------------------------------------------------------------------- |
+| `session`        | `string` | **Required**. Session Name You Have Created                              |
+| `to`             | `string` | **Required**. Receiver Phone Number with Country (e.g: 62812345678)      |
+| `urlVoiceNote`   | `string` | **Required**. URL Voice Note                                             |
+
 
 
 #### Send Bulk Message
@@ -135,12 +162,36 @@ You can use the WebSocket to listen for add new session and get the QR code.
 | :-------- | :------- | :------------------------------- |
 | `key`     | `string` | **Required**. Key on ".env" file |
 
+## WebHook
+You can use the WebHook to listen for incoming messages.
+
+#### WebHook URL
+
+```
+  GET /webhoks
+```
+
+#### Manage WebHook
+You can manage your WebHook URL with this endpoint. 
+```
+  PUT /manage-webhook
+```
+
+| Body      | Type     | Description                                         |
+| :-------- | :------- | :-------------------------------------------------- |
+| `session` | `string` | **Required**. Session Name You Have Created         |
+| `webhookUrl` | `string` | **Required**. WebHook URL to receive incoming messages |
+
 ## Changelog
 
-V3.2.0
+V4.0.0
 
 - Add Get All Session ID
 - Add Key for secret data
+- Add WebSocket for new session
+- Add Send Voice Note Message
+- Add Send Document Message
+- Add Send Image Message
 - Update README.md
 
 ## Upgrading
