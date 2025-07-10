@@ -157,13 +157,25 @@ exports.sendBulkMessage = async (req, res, next) => {
       const to = dt.to;
       const text = dt.text;
       const isGroup = !!dt.isGroup;
+      if (dt.urlDocument && dt.fileName) {
+        // Send Document Message
+        const fileName = dt.fileName || "Document";
+        await whatsapp.sendDocument({
+          sessionId,
+          to: to,
+          media: dt.urlDocument,
+          text: dt.caption,
+          filename: fileName,
+        });
+      } else {
+        await whatsapp.sendTextMessage({
+          sessionId,
+          to: to,
+          isGroup: isGroup,
+          text: text,
+        });
+      }
 
-      await whatsapp.sendTextMessage({
-        sessionId,
-        to: to,
-        isGroup: isGroup,
-        text: text,
-      });
       await whatsapp.createDelay(delay ?? 1000);
     }
     console.log("SEND BULK MESSAGE WITH DELAY SUCCESS");
