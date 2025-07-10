@@ -1,5 +1,7 @@
 const whatsapp = require("wa-multi-session");
 const axios = require('axios');
+const fs = require('fs/promises');
+
 
 whatsapp.onMessageReceived(async (msg) => {
   if (msg.key.fromMe || msg.key.remoteJid.includes("status")) return;
@@ -55,14 +57,21 @@ whatsapp.onMessageReceived(async (msg) => {
     });
   }
 
-  const webhookUrl = process.env.WEBHOOK_URL || null;
-  if (webhookUrl) {
-    console.log('Sending webhook to:', webhookUrl);
-    // Send webhook in background, don't await
-    axios.post(webhookUrl, messageResponse)
+  const webhookData = await fs.readFile('./webhook.json', 'utf8');
+  const WebhookJson = JSON.parse(webhookData);
+  const sessionWebhook = WebhookJson.find(item => item.session === msg.sessionId);
+  if (!sessionWebhook || !sessionWebhook.webhookUrl) {
+    console.warn(`No webhook URL configured for session: ${msg.sessionId}`);
+  } else {
+    axios.post(sessionWebhook.webhookUrl, messageResponse)
+      .then(response => {
+        console.log('Webhook sent successfully:', response.data);
+      })
       .catch(err => {
         console.error('Failed to send webhook:', err.message);
       });
   }
+
+
 
 });
